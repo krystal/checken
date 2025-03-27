@@ -43,6 +43,7 @@ module Checken
       end
 
       @group = group
+      @schema = group.schema
       @key = key
       @required_object_types = []
       @dependencies = []
@@ -84,7 +85,15 @@ module Checken
       end
 
       # Check the user has this permission
-      unless user_proxy.granted_permissions.include?(self.path)
+      if @group.schema.config.namespace && @group.schema.config.namespace_optional?
+        found_permission = (user_proxy.granted_permissions & [self.path, self.path_with_namespace]).any?
+      elsif @group.schema.config.namespace
+        found_permission = user_proxy.granted_permissions.include?(self.path_with_namespace)
+      else
+        found_permission = user_proxy.granted_permissions.include?(self.path)
+      end
+
+      unless found_permission
         @group.schema.logger.info "`#{self.path}` not granted to #{user_proxy.description}"
         error = PermissionDeniedError.new('PermissionNotGranted', "User has not been granted the '#{self.path}' permission", self)
         error.user = user_proxy.user

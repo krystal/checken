@@ -119,6 +119,72 @@ describe Checken::PermissionGroup do
       expect(found_permissions).to include p2
       expect(found_permissions).to include p3
     end
+
+    context "when the schema config has a namespace specified" do
+      let!(:group) { schema.root_group.add_group(:users) }
+      let!(:p1) { group.add_permission(:add) }
+      let!(:group2) { group.add_group(:subgroup) }
+      let!(:p2) { group2.add_permission(:edit) }
+      let!(:p3) { group2.add_permission(:delete) }
+
+      before do
+        schema.config.namespace = "test"
+      end
+
+      context "when the namespace matches the schema namespace" do
+        it "should return the permission with the namespace" do
+          expect(schema.root_group.find_permissions_from_path("test:users.add")).to eq([p1])
+          expect(schema.root_group.find_permissions_from_path("test:users.subgroup.edit")).to eq([p2])
+          expect(schema.root_group.find_permissions_from_path("test:users.subgroup.delete")).to eq([p3])
+        end
+      end
+
+      context "when the namespace is omitted" do
+        it "raises a Checken::Error" do
+          expect { schema.root_group.find_permissions_from_path("users.add") }.to raise_error(Checken::Error, /Namespace: 'test' is missing in path/)
+          expect { schema.root_group.find_permissions_from_path("users.subgroup.edit") }.to raise_error(Checken::Error, /Namespace: 'test' is missing in path/)
+          expect { schema.root_group.find_permissions_from_path("users.subgroup.delete") }.to raise_error(Checken::Error, /Namespace: 'test' is missing in path/)
+        end
+      end
+
+      context "when the namespace does not match the schema namespace" do
+        it "raises a Checken::Error" do
+          expect { schema.root_group.find_permissions_from_path("foo:users.add") }.to raise_error(Checken::Error, /does not match the schema namespace/)
+          expect { schema.root_group.find_permissions_from_path("foo:users.subgroup.edit") }.to raise_error(Checken::Error, /does not match the schema namespace/)
+          expect { schema.root_group.find_permissions_from_path("foo:users.subgroup.delete") }.to raise_error(Checken::Error, /does not match the schema namespace/)
+        end
+      end
+
+      context "when the namespace is optional" do
+        before do
+          schema.config.namespace_optional = true
+        end
+
+        context "when the namespace is omitted" do
+          it "should return the permission without the namespace" do
+            expect(schema.root_group.find_permissions_from_path("users.add")).to eq([p1])
+            expect(schema.root_group.find_permissions_from_path("users.subgroup.edit")).to eq([p2])
+            expect(schema.root_group.find_permissions_from_path("users.subgroup.delete")).to eq([p3])
+          end
+        end
+
+        context "when the namespace matches the schema namespace" do
+          it "should return the permission with the namespace" do
+            expect(schema.root_group.find_permissions_from_path("test:users.add")).to eq([p1])
+            expect(schema.root_group.find_permissions_from_path("test:users.subgroup.edit")).to eq([p2])
+            expect(schema.root_group.find_permissions_from_path("test:users.subgroup.delete")).to eq([p3])
+          end
+        end
+
+        context "when the namespace does not match the schema namespace" do
+          it "raises a Checken::Error" do
+            expect { schema.root_group.find_permissions_from_path("foo:users.add") }.to raise_error(Checken::Error, /does not match the schema namespace/)
+            expect { schema.root_group.find_permissions_from_path("foo:users.subgroup.edit") }.to raise_error(Checken::Error, /does not match the schema namespace/)
+            expect { schema.root_group.find_permissions_from_path("foo:users.subgroup.delete") }.to raise_error(Checken::Error, /does not match the schema namespace/)
+          end
+        end
+      end
+    end
   end
 
   context "#all_permissions" do
