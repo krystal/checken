@@ -28,16 +28,11 @@ jobs:
       tag_name: ${{ steps.release-please.outputs.tag_name }} # e.g. v1.0.0
       version: ${{ steps.release-please.outputs.version }} # e.g. 1.0.0
     steps:
-      - uses: tibdex/github-app-token@v1
-        id: generate-github-token
-        with:
-          app_id: ${{ vars.RELEASE_PLEASE_GITHUB_APP_ID }}
-          private_key: ${{ secrets.RELEASE_PLEASE_GITHUB_APP_PRIVATE_KEY }}
       - uses: krystal/release-please-manifest-action@v1
         id: release-please
         with:
-          token: ${{ steps.generate-github-token.outputs.token }}
-          command: manifest
+          app-id: ${{ vars.RELEASE_PLEASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_GITHUB_APP_PRIVATE_KEY }}
 
   release:
     name: Publish to RubyGems
