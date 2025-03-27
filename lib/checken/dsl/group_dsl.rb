@@ -36,6 +36,7 @@ module Checken
       def group(key, &block)
         sub_group = @group.groups[key.to_sym] || @group.add_group(key.to_sym)
         sub_group.dsl(:active_sets => active_sets, &block) if block_given?
+        sub_group.update_schema
         sub_group
       end
 
@@ -66,6 +67,7 @@ module Checken
         end
 
         permission.dsl(&block) if block_given?
+        permission.update_schema
         permission
       end
 
