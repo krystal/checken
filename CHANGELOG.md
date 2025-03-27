@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.2](https://github.com/krystal/checken/compare/v0.0.1...v0.0.2) (2025-03-27)
+
+
+### Miscellaneous Chores
+
+* release 0.0.2 ([ff941e8](https://github.com/krystal/checken/commit/ff941e806178186b3a36c0e674890b78e31d6fcb))
+
 ## [0.0.1](https://github.com/krystal/checken/compare/v0.0.1...v0.0.1) (2025-03-27)
 
 
