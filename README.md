@@ -112,3 +112,15 @@ group :projects do
   end
 end
 ```
+
+## Releasing a new version
+
+[Release Please](https://github.com/googleapis/release-please) is configured. The [convential commits](https://www.conventionalcommits.org/en/v1.0.0/) format should be used and upon merging to main, Release Please will open a new PR following semver rules. When that Release Please PR is merged, a new version of the gem will be created and published to RubyGems.
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/krystal/checken.
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
