@@ -11,5 +11,5 @@ Gem::Specification.new do |s|
   s.email         = ["adam@krystal.io"]
   s.licenses      = ['MIT']
   s.metadata["rubygems_mfa_required"] = "false" # Enabling MFA means we cannot auto publish via the CI
-  s.metadata["changelog_uri"] = "https://github.com/krystal/checken/CHANGELOG.md"
+  s.metadata["changelog_uri"] = "https://github.com/krystal/checken/blob/master/CHANGELOG.md"
 end
