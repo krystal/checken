@@ -6,4 +6,5 @@ group :development do
   gem 'rspec-core'
   gem 'rspec-expectations'
   gem 'rspec-mocks'
+  gem 'pry'
 end

@@ -66,25 +66,43 @@ describe Checken::DSL::GroupDSL do
     expect(schema.root_group[:delete].dependencies).to be_empty
   end
 
-  it "should reopen groups if they already have been defined" do
-    schema.root_group.dsl do
-      group :projects do
-        permission :list
-        group :edit do
-          permission :details
+  context 'when reopening groups' do
+    before do
+      schema.root_group.dsl do
+        group :projects do
+          permission :list
+          group :edit do
+            permission :details
+          end
         end
-      end
-      group :projects do
-        permission :view
-        group :edit do
-          permission :icon
+        group :projects do
+          permission :view
+          group :edit do
+            permission :icon
+          end
         end
       end
     end
-    expect(schema.root_group[:projects][:list]).to be_a Checken::Permission
-    expect(schema.root_group[:projects][:view]).to be_a Checken::Permission
-    expect(schema.root_group[:projects][:edit][:details]).to be_a Checken::Permission
-    expect(schema.root_group[:projects][:edit][:icon]).to be_a Checken::Permission
+
+    it "should reopen groups if they already have been defined" do
+      expect(schema.root_group[:projects][:list]).to be_a Checken::Permission
+      expect(schema.root_group[:projects][:view]).to be_a Checken::Permission
+      expect(schema.root_group[:projects][:edit][:details]).to be_a Checken::Permission
+      expect(schema.root_group[:projects][:edit][:icon]).to be_a Checken::Permission
+    end
+
+    it "should not add duplicate entries to the schema" do
+      expect(schema.schema).to eq(
+        {
+        "projects" => {description: nil, group: nil, name: nil, type: :group},
+        "projects.edit" => {description: nil, group: "projects", name: nil, type: :group},
+        "projects.edit.details" => {description: "projects.edit.details", group: "projects.edit", type: :permission},
+        "projects.edit.icon" => {description: "projects.edit.icon", group: "projects.edit", type: :permission},
+        "projects.list" => {description: "projects.list", group: "projects", type: :permission},
+        "projects.view" => {description: "projects.view", group: "projects", type: :permission},
+        }
+      )
+    end
   end
 
 end

@@ -19,6 +19,7 @@ module Checken
     def initialize
       @root_group = PermissionGroup.new(self, nil)
       @config = Config.new
+      @schema = {}
     end
 
     # Add configuration for this schema
@@ -126,6 +127,21 @@ module Checken
     # @return [Logger]
     def logger
       @config.logger
+    end
+
+    # Update the schema with the given entry
+    #
+    # @param entry [Hash]
+    # @return [Hash]
+    def update_schema(entry)
+      @schema.merge!(entry)
+    end
+
+    # Return the schema sorted alphabetically by key
+    #
+    # @return [Hash]
+    def schema
+      @schema.sort.to_h
     end
 
   end

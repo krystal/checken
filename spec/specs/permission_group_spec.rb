@@ -151,4 +151,60 @@ describe Checken::PermissionGroup do
     expect { Checken::PermissionGroup.new(schema, nil, :test) }.to raise_error(Checken::Error, /with a key/)
   end
 
+  describe "#update_schema" do
+    context "when the group has no path" do
+      it "does not update the schema" do
+        group = Checken::PermissionGroup.new(schema, nil)
+        group.update_schema
+        expect(schema.schema).to eq({})
+      end
+    end
+
+    context "when the group is a sub-group of the root group" do
+      it "updates the schema" do
+        group = Checken::PermissionGroup.new(schema, schema.root_group, :test).tap do |g|
+          g.name = "Group name"
+          g.description = "Group description"
+        end
+        group.update_schema
+        expect(schema.schema).to eq(
+          {
+            'test' => {
+              description: "Group description",
+              group: nil,
+              name: "Group name",
+              type: :group
+            }
+          }
+        )
+      end
+    end
+
+    context "when the group is a sub-group of another group" do
+      it "updates the schema" do
+        group = Checken::PermissionGroup.new(schema, schema.root_group, :test).tap do |g|
+          g.name = "Group name"
+          g.description = "Group description"
+        end
+
+
+        sub_group = Checken::PermissionGroup.new(schema, group, :sub_group).tap do |g|
+          g.name = "Sub-group name"
+          g.description = "Sub-group description"
+        end
+        sub_group.update_schema
+        expect(schema.schema).to eq(
+          {
+            'test.sub_group' => {
+              description: "Sub-group description",
+              group: 'test',
+              name: "Sub-group name",
+              type: :group
+            }
+          }
+        )
+      end
+    end
+  end
+
 end

@@ -165,5 +165,20 @@ module Checken
       dsl
     end
 
+    def update_schema
+      return if path.nil?
+
+      schema.update_schema(
+        {
+          path => {
+            type: :group,
+            name: name,
+            description: description,
+            group: group&.path
+          }
+        }
+      )
+    end
+
   end
 end

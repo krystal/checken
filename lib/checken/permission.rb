@@ -295,5 +295,19 @@ module Checken
       end.flatten
     end
 
+    def update_schema
+      return if path.nil?
+
+      group.schema.update_schema(
+        {
+          path => {
+            type: :permission,
+            description: description,
+            group: group.path
+          }
+        }
+      )
+    end
+
   end
 end

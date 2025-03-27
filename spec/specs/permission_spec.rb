@@ -354,4 +354,68 @@ describe Checken::Permission do
     end
   end
 
+  describe "#update_schema" do
+    context "when the permission has no path" do
+      it "should not update the schema" do
+        permission = Checken::Permission.new(group, nil)
+        permission.update_schema
+        expect(permission.group.schema.schema).to eq({})
+      end
+    end
+
+    context "when a permission is added to the root group" do
+      it "should update the schema" do
+        permission = schema.root_group.add_permission(:change_password)
+        permission.description = "Change password"
+        permission.update_schema
+        expect(permission.group.schema.schema).to eq(
+          {
+            'change_password' => {
+              description: 'Change password',
+              group: nil,
+              type: :permission
+            }
+          }
+        )
+      end
+    end
+
+    context 'when a permission is added to a sub-group of the root group' do
+      it 'should update the schema' do
+        group1 = schema.root_group.add_group(:group1)
+        permission = group1.add_permission(:change_password)
+        permission.description = "Change password"
+        permission.update_schema
+        expect(permission.group.schema.schema).to eq(
+          {
+            'group1.change_password' => {
+              description: 'Change password',
+              group: 'group1',
+              type: :permission
+            }
+          }
+        )
+      end
+    end
+
+    context 'when a permission is added to a sub-group of a sub-group' do
+      it 'should update the schema' do
+        group1 = schema.root_group.add_group(:group1)
+        group2 = group1.add_group(:group2)
+        permission = group2.add_permission(:change_password)
+        permission.description = "Change password"
+        permission.update_schema
+        expect(permission.group.schema.schema).to eq(
+          {
+            'group1.group2.change_password' => {
+              description: 'Change password',
+              group: 'group1.group2',
+              type: :permission
+            }
+          }
+        )
+      end
+    end
+  end
+
 end
