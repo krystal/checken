@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/krystal/checken/compare/v0.0.3...v0.0.4) (2025-03-27)
+
+
+### Features
+
+* expose permissions in Hash format ([8362ccd](https://github.com/krystal/checken/commit/8362ccddf0cc48ccf444d5d0243de31705af7d2e))
+
 ## [0.0.3](https://github.com/krystal/checken/compare/v0.0.2...v0.0.3) (2025-03-27)
 
 
