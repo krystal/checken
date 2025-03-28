@@ -21,8 +21,9 @@ module Checken
         raise Error, "Could not determine a schema. Make sure you set Checken.current_schema or pass :schema to can? methods."
       end
 
+      strict = options.delete(:strict) { true }
       user_proxy = schema.config.user_proxy_class.new(self)
-      schema.check_permission!(permission_path, user_proxy, object)
+      schema.check_permission!(permission_path, user_proxy, object, strict: strict)
     end
 
     def can?(*args)

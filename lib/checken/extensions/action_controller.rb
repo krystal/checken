@@ -17,14 +17,14 @@ module Checken
         # when performing permission checks using `restrict`.
       end
 
-      def restrict(permission_path, object = nil, options = {})
+      def restrict(permission_path, object = nil, options = {}, strict: true)
         if checken_user_proxy.nil?
           user = send(Checken.current_schema.config.current_user_method_name)
           user_proxy = Checken.current_schema.config.user_proxy_class.new(user)
         else
           user_proxy = checken_user_proxy
         end
-        granted_permissions = Checken.current_schema.check_permission!(permission_path, user_proxy, object)
+        granted_permissions = Checken.current_schema.check_permission!(permission_path, user_proxy, object, strict: strict)
         granted_permissions.each do |permission|
           granted_checken_permissions << permission
         end
@@ -35,7 +35,7 @@ module Checken
       end
 
       module ClassMethods
-        def restrict(permission_path, object_or_options = {}, options_if_object_provided = {})
+        def restrict(permission_path, object_or_options = {}, options_if_object_provided = {}, strict: true)
           if object_or_options.is_a?(Hash)
             object = nil
             options = object_or_options
@@ -61,7 +61,7 @@ module Checken
               resolved_object = nil
             end
 
-            restrict(permission_path, resolved_object, restrict_options)
+            restrict(permission_path, resolved_object, restrict_options, strict: strict)
           end
 
         end
