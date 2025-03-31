@@ -157,6 +157,40 @@ describe Checken::Schema do
     end
   end
 
+  context "with unstrict permission checking" do
+    context "with a user object" do
+      let(:fake_user) { FakeUser.new(['users.edit']) }
+
+      it "should not raise an error if the user has the permission" do
+        expect { schema.check_permission!("users.edit", fake_user, strict: false) }.to_not raise_error
+      end
+
+      it "should raise an error if the user does not have the permission" do
+        expect { schema.check_permission!("accounts.delete", fake_user, strict: false) }.to raise_error Checken::PermissionDeniedError
+      end
+    end
+
+    context 'with a user proxy' do
+      let(:fake_user) { FakeUser.new(['users.edit']) }
+      let(:user_proxy) { Checken::UserProxy.new(fake_user) }
+
+      it "should not raise an error if the user has the permission" do
+        expect { schema.check_permission!("users.edit", user_proxy, strict: false) }.to_not raise_error
+      end
+
+      it "should raise an error if the user does not have the permission" do
+        expect { schema.check_permission!("accounts.delete", user_proxy, strict: false) }.to raise_error Checken::PermissionDeniedError
+      end
+    end
+
+    context "with a wildcard" do
+      it "raises an error" do
+        expect { schema.check_permission!("users.*", FakeUser.new(['users.edit']), strict: false) }
+          .to raise_error Checken::PermissionNotFoundError, "Permission path cannot contain wildcards when strict is false"
+      end
+    end
+  end
+
   context "#load_from_directory" do
     subject(:fixture_path) { File.join(TEST_ROOT, 'fixtures', 'permissions') }
     it "should return false if the directory doesn't exist" do

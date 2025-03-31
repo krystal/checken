@@ -155,8 +155,12 @@ module Checken
     end
 
     def handle_unstrict_permission_check!(permission_path, user_proxy)
+      if permission_path.include?('*')
+        raise Checken::PermissionNotFoundError, "Permission path cannot contain wildcards when strict is false"
+      end
+
       unless user_proxy.is_a?(Checken::UserProxy)
-        user_proxy = @group.schema.config.user_proxy_class.new(user_proxy)
+        user_proxy = config.user_proxy_class.new(user_proxy)
       end
       return [permission_path] if user_proxy.granted_permissions.include?(permission_path)
 
