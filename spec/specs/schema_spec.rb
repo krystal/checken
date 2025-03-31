@@ -5,7 +5,7 @@ describe Checken::Schema do
 
   subject(:schema) { Checken::Schema.new }
 
-  context "#check_permission!" do
+  describe "#check_permission!" do
     it "should not raise an error when granted" do
       permission = schema.root_group.add_permission(:change_password)
       fake_user = FakeUser.new(['change_password'])
@@ -43,6 +43,66 @@ describe Checken::Schema do
       checked_permissions = schema.check_permission!('add_project', fake_user)
       expect(checked_permissions).to include permission
 
+    end
+
+    context "when a namespace is defined" do
+      let(:fake_user) { FakeUser.new(['myapp:change_password', 'otherapp:change_password', 'otherapp:delete_account']) }
+
+      before do
+        schema.config.namespace = 'myapp'
+        schema.root_group.add_permission(:change_password)
+      end
+
+      it "should raise a permission not found error when checking the granted permission without the namespace" do
+        expect { schema.check_permission!('change_password', fake_user) }
+          .to raise_error Checken::PermissionNotFoundError
+      end
+
+      it "should raise a permission not found error when checking the granted permission with an unknown namespace" do
+        expect { schema.check_permission!('foo:change_password', fake_user) }
+          .to raise_error Checken::PermissionNotFoundError
+      end
+
+      it "should raise a permission not found error when checking the granted permission for another namespace" do
+        expect { schema.check_permission!('otherapp:change_password', fake_user) }
+          .to raise_error Checken::PermissionNotFoundError
+      end
+
+      it "should not raise an error when checking the granted permission with the correct namespace" do
+        expect { schema.check_permission!('myapp:change_password', fake_user) }.not_to raise_error
+      end
+
+      context "when the defined namespace is set as optional" do
+        before do
+          schema.config.namespace_optional = true
+        end
+
+        it "should raise an error when checking the granted permission with an unknown namespace" do
+          expect { schema.check_permission!('foo:change_password', fake_user) }
+            .to raise_error Checken::PermissionNotFoundError
+        end
+
+        it "should raise an error when checking the granted permission with another app namespace" do
+          expect { schema.check_permission!('otherapp:change_password', fake_user) }
+            .to raise_error Checken::PermissionNotFoundError
+
+          expect { schema.check_permission!('otherapp:delete_account', fake_user) }
+            .to raise_error Checken::PermissionNotFoundError
+        end
+
+        it "should raise an error when checking an unknown permission without namespace" do
+          expect { schema.check_permission!('delete_account', fake_user) }
+            .to raise_error Checken::PermissionNotFoundError
+        end
+
+        it "should not raise an error when checking the granted permission without the namespace" do
+          expect { schema.check_permission!('change_password', fake_user) }.not_to raise_error
+        end
+
+        it "should not raise an error when checking the granted permission with the correct namespace" do
+          expect { schema.check_permission!('myapp:change_password', fake_user) }.not_to raise_error
+        end
+      end
     end
   end
 

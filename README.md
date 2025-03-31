@@ -2,10 +2,10 @@
 
 Checken (like chicken) is an authorization framework for Ruby/Rails applications to allow you to build a complete permission & access control system for your users. The goals of the project are:
 
-* To allow you easily to verify whether a user is authorized to perform an action.
-* Support any number of different actions.
-* Allow actions to be associated with an object.
-* Allow actions to have additional rules which can be applied to them.
+- To allow you easily to verify whether a user is authorized to perform an action.
+- Support any number of different actions.
+- Allow actions to be associated with an object.
+- Allow actions to have additional rules which can be applied to them.
 
 This is an example of the DSL required to get started:
 
@@ -112,6 +112,64 @@ group :projects do
   end
 end
 ```
+
+### Namespace
+
+An optional namespace can be set as part of the config in the initializer in the Rails application.
+
+```ruby
+Checken::Schema.instance.configure do |config|
+  config.namespace = 'app1'
+end
+```
+
+This will prefix all group and permissions paths with the namespace.
+By default `:` will be used as the delimiter but that can be configured:
+
+```ruby
+Checken::Schema.instance.configure do |config|
+  config.namespace = 'app1'
+  config.namespace_delimiter = '-'
+end
+```
+
+When defining the permission path with `restrict` or checking with `can?`, you need to include the namespace:
+
+```ruby
+restrict 'app1:users.edit'
+current_user.can?('app1:users.edit')
+```
+
+And it means the permissions granted to your users should also include that namespace prefix.
+
+It is possible to allow the namespace to be omitted from both where you declare `restrict` and
+also in the permissions granted to users. In the Rails initializer set the `namespace_optional` config option to true.
+
+```ruby
+Checken::Schema.instance.configure do |config|
+  config.namespace = 'app1'
+  config.namespace_optional = true
+end
+```
+
+Now you can define the permission path with or without the namespace:
+
+```ruby
+restrict 'users.edit'
+current_user.can?('app1:users.edit')
+```
+
+Setting `namespace_optional` is primarily for the purpose of migrating existing non-namespaced permissions to a namespaced system.
+With this configuration, a user with either "app1:users.edit" or "users.edit" will be matched when checking permissions.
+
+The migration would follow these steps:
+
+1. Update the Rails initializer to set the Checken config with the `namespace` and `namespace_optional` as true.
+2. Update all places permissions are checked with Checken (e.g. `restrict` or `can?`) to include the namespace.
+3. Deploy the application (to avoid issues with rolling deploys).
+4. Migrate the permissions in the database to include the namespace.
+5. Update the Rails initializer to remove `namespace_optional` (default is false).
+6. Deploy the application.
 
 ## Releasing a new version
 

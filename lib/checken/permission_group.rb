@@ -111,6 +111,7 @@ module Checken
         raise PermissionNotFoundError, "Must provide a permission path"
       end
 
+      path = parse_namespace(path)
       path_parts = path.split('.').map(&:to_sym)
       last_group_or_permission = self
       while part = path_parts.shift
@@ -178,6 +179,33 @@ module Checken
           }
         }
       )
+    end
+
+    private
+
+    # Parse the namespace from the path
+    # Depending on the schema configuration, the namespace may be optional or required.
+    # If the namespace is required, the namespace must match the schema namespace.
+    # If the namespace is optional, the namespace may be omitted.
+    # On success the namespace will be removed from the path and the remaining path will be returned.
+    #
+    # @param path [String]
+    # @return [String]
+    def parse_namespace(path)
+      match_data = path.match(/^(.*)#{@schema.config.namespace_delimiter}(.*)$/)
+
+      if match_data.nil? && @schema.config.namespace && !@schema.config.namespace_optional?
+        raise PermissionNotFoundError, "Namespace: '#{@schema.config.namespace}' is missing in path: '#{path}'"
+      elsif match_data.nil?
+        return path
+      end
+
+      namespace, remaining_path = match_data.captures
+      if namespace && namespace != @schema.config.namespace
+        raise PermissionNotFoundError, "Namespace: '#{namespace}' does not match the schema namespace: '#{@schema.config.namespace}'"
+      end
+
+      remaining_path || path
     end
 
   end

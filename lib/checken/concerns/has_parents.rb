@@ -9,6 +9,13 @@ module Checken
         @key.nil? ? nil : [@group.path, @key].compact.join('.')
       end
 
+      # Return the full path to this permission with the namespace
+      #
+      # @return [String]
+      def path_with_namespace
+        [@schema.config.namespace, path].compact.join(@schema.config.namespace_delimiter)
+      end
+
       # Return the parents for ths group
       #
       # @return [Array<Checken::PermissionGroup, Checken::Permission>]
