@@ -171,6 +171,19 @@ The migration would follow these steps:
 5. Update the Rails initializer to remove `namespace_optional` (default is false).
 6. Deploy the application.
 
+### Strictness
+
+By default all permission checks are 'strict' which means the permission(s) must exist in the defined Checken schema.
+
+However it can be useful to use Checken along side permissions that are defined outside the schema, perhaps with a different namespace. These can be checked by specifying `strict: false`:
+
+```ruby
+current_user.can?("billing:payment_cards.edit", strict: false)
+restrict 'myapp:admin.ui', strict: false
+```
+
+The `UserProxy` is expected to have the permission path exactly as-is, within the array returned by `granted_permissions`.
+
 ## Releasing a new version
 
 [Release Please](https://github.com/googleapis/release-please) is configured. The [convential commits](https://www.conventionalcommits.org/en/v1.0.0/) format should be used and upon merging to main, Release Please will open a new PR following semver rules. When that Release Please PR is merged, a new version of the gem will be created and published to RubyGems.

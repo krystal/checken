@@ -32,48 +32,11 @@ module Checken
     # @param permission_path [String]
     # @param user [User]
     # @param object [Object]
-    def check_permission!(permission_path, user_proxy, object = nil)
-      permissions = @root_group.find_permissions_from_path(permission_path)
-
-      if permissions.size == 1
-        # If we only have a single permission, we'll just run the check
-        # as normal through the check process. This will work as normal and raise
-        # and return directly.
-        permissions.first.check!(user_proxy, object)
-
-      elsif permissions.size == 0
-        # No permissions found
-        raise Checken::NoPermissionsFoundError, "No permissions found matching #{permission_path}"
-
+    def check_permission!(permission_path, user_proxy, object = nil, strict: true)
+      if strict # permission(s) for the path are expected to be defined within the Checken Schema
+        handle_strict_permission_check!(permission_path, user_proxy, object)
       else
-        # If we have multiple permissions, we need to loop through each permission
-        # and handle them as appropriate.
-        granted_permissions = []
-        ungranted_permissions = 0
-        permissions.each do |permission|
-          begin
-            permission.check!(user_proxy, object).each do |permission|
-              granted_permissions << permission
-            end
-          rescue Checken::PermissionDeniedError => e
-            if e.code == 'PermissionNotGranted'
-              # If the permission isn't granted, update the counter so we can
-              # keep track of the number of ungranted permissions.
-              ungranted_permissions += 1
-            else
-              # Raise other errors as normal
-              raise
-            end
-          end
-        end
-
-        if permissions.size == ungranted_permissions
-          # If the user is ungranted to all the found permissions, they do not
-          # have access and should be denied.
-          raise PermissionDeniedError.new('PermissionNotGranted', "User does not have any permissions #{permissions.map(&:path).join(', ')} permission.", permissions.first)
-        else
-          granted_permissions
-        end
+        handle_unstrict_permission_check!(permission_path, user_proxy)
       end
     end
 
@@ -142,6 +105,68 @@ module Checken
     # @return [Hash]
     def schema
       @schema.sort.to_h
+    end
+
+    private
+
+    def handle_strict_permission_check!(permission_path, user_proxy, object)
+      permissions = @root_group.find_permissions_from_path(permission_path)
+
+      if permissions.size == 1
+        # If we only have a single permission, we'll just run the check
+        # as normal through the check process. This will work as normal and raise
+        # and return directly.
+        permissions.first.check!(user_proxy, object)
+
+      elsif permissions.size == 0
+        # No permissions found
+        raise Checken::NoPermissionsFoundError, "No permissions found matching #{permission_path}"
+
+      else
+        # If we have multiple permissions, we need to loop through each permission
+        # and handle them as appropriate.
+        granted_permissions = []
+        ungranted_permissions = 0
+        permissions.each do |permission|
+          begin
+            permission.check!(user_proxy, object).each do |permission|
+              granted_permissions << permission
+            end
+          rescue Checken::PermissionDeniedError => e
+            if e.code == 'PermissionNotGranted'
+              # If the permission isn't granted, update the counter so we can
+              # keep track of the number of ungranted permissions.
+              ungranted_permissions += 1
+            else
+              # Raise other errors as normal
+              raise
+            end
+          end
+        end
+
+        if permissions.size == ungranted_permissions
+          # If the user is ungranted to all the found permissions, they do not
+          # have access and should be denied.
+          raise PermissionDeniedError.new('PermissionNotGranted', "User does not have any permissions #{permissions.map(&:path).join(', ')} permission.", permissions.first)
+        else
+          granted_permissions
+        end
+      end
+    end
+
+    def handle_unstrict_permission_check!(permission_path, user_proxy)
+      if permission_path.include?('*')
+        raise Checken::PermissionNotFoundError, "Permission path cannot contain wildcards when strict is false"
+      end
+
+      unless user_proxy.is_a?(Checken::UserProxy)
+        user_proxy = config.user_proxy_class.new(user_proxy)
+      end
+      return [permission_path] if user_proxy.granted_permissions.include?(permission_path)
+
+      error = PermissionDeniedError.new('PermissionNotGranted', "User has not been granted the '#{permission_path}' permission")
+      error.user = user_proxy.user
+      raise error
     end
 
   end
