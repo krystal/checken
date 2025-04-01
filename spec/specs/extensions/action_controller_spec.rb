@@ -15,9 +15,13 @@ RSpec.describe Checken::Extensions::ActionController, type: :controller do
     context "with strict checks" do
       controller(ActionController::Base) do
         include Checken::Extensions::ActionController
-        restrict 'change_password'
+        restrict 'change_password', only: [:index]
 
         def index
+          head :no_content
+        end
+
+        def new
           head :no_content
         end
 
@@ -33,22 +37,23 @@ RSpec.describe Checken::Extensions::ActionController, type: :controller do
       context "when the user does not have the required permission" do
         let(:current_user) { FakeUser.new(['create_account']) }
 
-        it "restricts access to the action if the user does not have permission" do
+        it "restricts access to the restricted action" do
           expect { get :index }.to raise_error(Checken::PermissionDeniedError)
+        end
+
+        it "allows access to the unrestricted action" do
+          expect { get :new }.not_to raise_error
+          expect(response).to have_http_status(:no_content)
         end
       end
 
       context "when the user does have the required permission" do
         let(:current_user) { FakeUser.new(['change_password']) }
 
-        it "allows access to the action when the user has permission" do
+        it "allows access to the restricted action" do
           expect { get :index }.not_to raise_error
           expect(response).to have_http_status(:no_content)
         end
-      end
-
-      context "when the controller tries to restrict using a permission that does not exist" do
-
       end
     end
 
@@ -81,9 +86,13 @@ RSpec.describe Checken::Extensions::ActionController, type: :controller do
     context "with strict: false" do
       controller(ActionController::Base) do
         include Checken::Extensions::ActionController
-        restrict 'edit_user', strict: false
+        restrict 'new_user', except: :index, strict: false
 
         def index
+          head :no_content
+        end
+
+        def new
           head :no_content
         end
 
@@ -95,15 +104,25 @@ RSpec.describe Checken::Extensions::ActionController, type: :controller do
       context "when the user does not have the required permission" do
         let(:current_user) { FakeUser.new(['create_account']) }
 
-        it "restricts access to the action when the user does not have permission" do
-          expect { get :index }.to raise_error(Checken::PermissionDeniedError)
+        it "restricts access to the restricted action" do
+          expect { get :new }.to raise_error(Checken::PermissionDeniedError)
+        end
+
+        it "does not restrict access to the unrestricted action" do
+          expect { get :index }.not_to raise_error
+          expect(response).to have_http_status(:no_content)
         end
       end
 
       context "when the user does have the required permission" do
-        let(:current_user) { FakeUser.new(['edit_user']) }
+        let(:current_user) { FakeUser.new(['new_user']) }
 
-        it "allows access to the action when the user has permission" do
+        it "allows access to the restricted action" do
+          expect { get :new }.not_to raise_error
+          expect(response).to have_http_status(:no_content)
+        end
+
+        it "does not restrict access to the unrestricted action" do
           expect { get :index }.not_to raise_error
           expect(response).to have_http_status(:no_content)
         end
