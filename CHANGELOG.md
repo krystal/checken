@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.5](https://github.com/krystal/checken/compare/v0.0.4...v0.0.5) (2025-04-01)
+
+
+### Features
+
+* allow optional namespace configuration ([#10](https://github.com/krystal/checken/issues/10)) ([69ef488](https://github.com/krystal/checken/commit/69ef4887080779271a1262ffe6aa4132efefc892))
+* allow strict and unstrict checks ([#13](https://github.com/krystal/checken/issues/13)) ([aa666f8](https://github.com/krystal/checken/commit/aa666f85c24891cda95b9b3535e9baf5285c0fc8))
+
 ## [0.0.4](https://github.com/krystal/checken/compare/v0.0.3...v0.0.4) (2025-03-27)
 
 
