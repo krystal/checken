@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/krystal/checken/compare/v0.0.5...v0.0.6) (2025-04-01)
+
+
+### Bug Fixes
+
+* ensure strict option allows before_action opts ([#14](https://github.com/krystal/checken/issues/14)) ([445b1aa](https://github.com/krystal/checken/commit/445b1aa731384fae5b62d0d7b2c3f50d21a38d6c))
+
 ## [0.0.5](https://github.com/krystal/checken/compare/v0.0.4...v0.0.5) (2025-04-01)
 
 
