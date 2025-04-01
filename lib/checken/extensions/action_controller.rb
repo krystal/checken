@@ -17,13 +17,14 @@ module Checken
         # when performing permission checks using `restrict`.
       end
 
-      def restrict(permission_path, object = nil, options = {}, strict: true)
+      def restrict(permission_path, object = nil, options = {})
         if checken_user_proxy.nil?
           user = send(Checken.current_schema.config.current_user_method_name)
           user_proxy = Checken.current_schema.config.user_proxy_class.new(user)
         else
           user_proxy = checken_user_proxy
         end
+        strict = options.delete(:strict) { true }
         granted_permissions = Checken.current_schema.check_permission!(permission_path, user_proxy, object, strict: strict)
         granted_permissions.each do |permission|
           granted_checken_permissions << permission
@@ -44,8 +45,8 @@ module Checken
             options = options_if_object_provided
           end
 
-          strict = options.delete(:strict) { true }
-          restrict_options = options.delete(:restrict_options)
+          restrict_options = options.delete(:restrict_options) || {}
+          restrict_options[:strict] = options.delete(:strict) { true }
 
           before_action(options) do
             if object.is_a?(Proc)
@@ -62,7 +63,7 @@ module Checken
               resolved_object = nil
             end
 
-            restrict(permission_path, resolved_object, restrict_options, strict: strict)
+            restrict(permission_path, resolved_object, restrict_options)
           end
 
         end
