@@ -35,7 +35,7 @@ module Checken
       end
 
       module ClassMethods
-        def restrict(permission_path, object_or_options = {}, options_if_object_provided = {}, strict: true)
+        def restrict(permission_path, object_or_options = {}, options_if_object_provided = {})
           if object_or_options.is_a?(Hash)
             object = nil
             options = object_or_options
@@ -44,6 +44,7 @@ module Checken
             options = options_if_object_provided
           end
 
+          strict = options.delete(:strict) { true }
           restrict_options = options.delete(:restrict_options)
 
           before_action(options) do
