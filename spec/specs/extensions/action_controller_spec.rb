@@ -84,24 +84,24 @@ RSpec.describe Checken::Extensions::ActionController, type: :controller do
 
     # strict: false means the permission does not need to exist in the schema
     context "with strict: false" do
-      controller(ActionController::Base) do
-        include Checken::Extensions::ActionController
-        restrict 'new_user', except: :index, strict: false
-
-        def index
-          head :no_content
-        end
-
-        def new
-          head :no_content
-        end
-
-        def current_user
-          nil
-        end
-      end
-
       context "when the user does not have the required permission" do
+        controller(ActionController::Base) do
+          include Checken::Extensions::ActionController
+          restrict 'new_user', except: :index, strict: false
+
+          def index
+            head :no_content
+          end
+
+          def new
+            head :no_content
+          end
+
+          def current_user
+            nil
+          end
+        end
+
         let(:current_user) { FakeUser.new(['create_account']) }
 
         it "restricts access to the restricted action" do
@@ -115,6 +115,23 @@ RSpec.describe Checken::Extensions::ActionController, type: :controller do
       end
 
       context "when the user does have the required permission" do
+        controller(ActionController::Base) do
+          include Checken::Extensions::ActionController
+          restrict 'new_user', except: :index, strict: false
+
+          def index
+            head :no_content
+          end
+
+          def new
+            head :no_content
+          end
+
+          def current_user
+            nil
+          end
+        end
+
         let(:current_user) { FakeUser.new(['new_user']) }
 
         it "allows access to the restricted action" do
