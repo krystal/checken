@@ -309,7 +309,7 @@ module Checken
 
       group.schema.update_schema(
         {
-          path => {
+          path_with_namespace => {
             type: :permission,
             description: description,
             group: group.path

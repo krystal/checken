@@ -244,6 +244,30 @@ describe Checken::PermissionGroup do
           }
         )
       end
+
+      context "when the schema has a namespace" do
+        before do
+          schema.config.namespace = "test"
+        end
+
+        it "updates the schema with the namespace" do
+          group = Checken::PermissionGroup.new(schema, schema.root_group, :users).tap do |g|
+            g.name = "Group name"
+            g.description = "Group description"
+          end
+          group.update_schema
+          expect(schema.schema).to eq(
+            {
+              'test:users' => {
+                description: "Group description",
+                group: nil,
+                name: "Group name",
+                type: :group
+              }
+            }
+          )
+        end
+      end
     end
 
     context "when the group is a sub-group of another group" do

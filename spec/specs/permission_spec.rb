@@ -378,6 +378,27 @@ describe Checken::Permission do
           }
         )
       end
+
+      context "when the schema has a namespace" do
+        before do
+          schema.config.namespace = 'test'
+        end
+
+        it "should update the schema with the namespace" do
+          permission = schema.root_group.add_permission(:change_password)
+          permission.description = "Change password"
+          permission.update_schema
+          expect(permission.group.schema.schema).to eq(
+            {
+              'test:change_password' => {
+                description: 'Change password',
+                group: nil,
+                type: :permission
+              }
+            }
+          )
+        end
+      end
     end
 
     context 'when a permission is added to a sub-group of the root group' do

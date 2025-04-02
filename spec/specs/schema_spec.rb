@@ -5,6 +5,45 @@ describe Checken::Schema do
 
   subject(:schema) { Checken::Schema.new }
 
+  describe "#configure" do
+
+    it "allows setting the namespace and delimeter" do
+      schema.configure do |config|
+        config.namespace = 'myapp'
+        config.namespace_delimiter = ':'
+      end
+
+      expect(schema.config.namespace).to eq 'myapp'
+      expect(schema.config.namespace_delimiter).to eq ':'
+    end
+
+    it "uses the namespace in the schema export" do
+      group = schema.root_group.add_group(:users)
+      group.update_schema
+      permission = schema.root_group.add_permission(:edit_account)
+      permission.update_schema
+
+      schema.configure do |config|
+        config.namespace = 'myapp'
+        config.namespace_delimiter = ':'
+      end
+
+      expect(schema.schema).to eq({
+        'myapp:users' => {
+          type: :group,
+          description: nil,
+          name: nil,
+          group: nil,
+        },
+        'myapp:edit_account' => {
+          type: :permission,
+          description: 'edit_account',
+          group: nil,
+        }
+      })
+    end
+  end
+
   describe "#check_permission!" do
     it "should not raise an error when granted" do
       permission = schema.root_group.add_permission(:change_password)
