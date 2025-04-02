@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.8](https://github.com/krystal/checken/compare/v0.0.7...v0.0.8) (2025-04-02)
+
+
+### Bug Fixes
+
+* include the namespace in the schema export ([#18](https://github.com/krystal/checken/issues/18)) ([76fbd68](https://github.com/krystal/checken/commit/76fbd6899ba947bde924164b33f571e13b6a44d8))
+
 ## [0.0.7](https://github.com/krystal/checken/compare/v0.0.6...v0.0.7) (2025-04-01)
 
 
