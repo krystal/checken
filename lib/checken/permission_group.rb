@@ -171,7 +171,7 @@ module Checken
 
       schema.update_schema(
         {
-          path => {
+          path_with_namespace => {
             type: :group,
             name: name,
             description: description,
