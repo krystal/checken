@@ -25,6 +25,7 @@ module Checken
     # Add configuration for this schema
     def configure(&block)
       block.call(@config)
+      set_namespace if @config.namespace
     end
 
     # Does the given user have the appropriate permissions to handle?
@@ -167,6 +168,12 @@ module Checken
       error = PermissionDeniedError.new('PermissionNotGranted', "User has not been granted the '#{permission_path}' permission")
       error.user = user_proxy.user
       raise error
+    end
+
+    def set_namespace
+      @schema.transform_keys! do |key|
+        "#{@config.namespace}#{@config.namespace_delimiter}#{key}"
+      end
     end
 
   end
