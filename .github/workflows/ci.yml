@@ -10,8 +10,8 @@ jobs:
           - 3.3
           - 3.4
     steps:
-      - uses: actions/checkout@v3
-      - uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ruby/setup-ruby@f8d7259c7a66155a7c4a157a1a10ca601f186594 # v1.271.0
         with:
           ruby-version: ${{ matrix.ruby_version }}
       - name: Install dependencies
@@ -28,7 +28,7 @@ jobs:
       tag_name: ${{ steps.release-please.outputs.tag_name }} # e.g. v1.0.0
       version: ${{ steps.release-please.outputs.version }} # e.g. 1.0.0
     steps:
-      - uses: krystal/release-please-manifest-action@v1
+      - uses: krystal/release-please-manifest-action@9e83450383c02fad51005c8248d04353da5be3ee # v3.0.0
         id: release-please
         with:
           app-id: ${{ vars.RELEASE_PLEASE_GITHUB_APP_ID }}
@@ -40,10 +40,10 @@ jobs:
     needs: [release-please, test]
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@f8d7259c7a66155a7c4a157a1a10ca601f186594 # v1.271.0
         with:
           ruby-version: 3.3
 
